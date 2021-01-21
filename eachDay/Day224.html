@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #circle {
+            background: red;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+<!--<div id="circle"></div>-->
+<!--<img src="bg.png" usemap="#Map" id="test2"/>-->
+<!--<map name="Map" id="Map" style="background-color: yellow;" onclick="alert('map')">-->
+<!--    <area-->
+<!--            shape="circle"-->
+<!--            coords="100,100,50"-->
+<!--            href="https://www.yidengxuetang.com/"-->
+<!--            rel="external nofollow"-->
+<!--            target="_blank"-->
+<!--            style="background-color: red;"-->
+<!--    />-->
+<!--</map>-->
+<canvas id="drawing" width="400" height="400"></canvas>
+</body>
+<script>
+    // document.querySelector("#circle").onclick = function () {
+    //     alert("ok");
+    // };
+    // document.querySelector("#test2").onclick = function () {
+    //     alert("ok2");
+    // };
+
+    // document.querySelector("#test2").onclick = function (e) {
+    //     let [x, y, r] = [100, 100, 100], // x,y 坐标原点，r半径
+    //         x1 = e.clientX, // 获取x坐标
+    //         y1 = e.clientY, // 获取y坐标
+    //         dis = Math.abs(Math.sqrt(Math.pow(x - x1, 2) + Math.pow(y - y1, 2)));
+    //     if (dis < r) {
+    //         alert("ok");
+    //     }
+    // };
+</script>
+<script>
+    window.onload = () => {
+        let drawing = document.querySelector("#drawing"),
+            ctx = drawing.getContext("2d");
+        circle = new Shape(100, 100, 50);
+        circle.click = () => {
+            alert("ok");
+        };
+        drawing.onmousedown = function (event) {
+            let { clientX, clientY } = event || window.event,
+                point = {
+                    x: clientX - drawing.offsetLeft,
+                    y: clientY - drawing.offsetTop,
+                };
+            circle.reDraw(point);
+        };
+
+        function Shape(x, y, r) {
+            this.x = x;
+            this.y = y;
+            this.r = r;
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 2 * Math.PI, false);
+            ctx.closePath();
+            ctx.fill();
+        }
+        Shape.prototype.reDraw = function (point) {
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 2 * Math.PI, false);
+            ctx.closePath();
+            ctx.fill();
+            //   判断点击是否在圆形区域内
+            if (ctx.isPointInPath(point.x, point.y)) {
+                this.click();
+            }
+        };
+    };
+</script>
+</html>
