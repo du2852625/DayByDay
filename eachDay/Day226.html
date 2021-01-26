@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+<script>
+    // array.reduce(function (total, currentValue, currentIndex, arr) {},
+    //     initialValue);
+    //
+    // array.map(function (crrentValue, index, arr) {}, thisArg);
+
+    Array.prototype.myMap = function (fn, thisArg = []) {
+        if (typeof fn !== function) {
+            throw new Error(`${fn} is not a function`);
+        }
+        const res = [];
+        this.reduce((pre, cur, index, arr) => {
+            res.push(fn.call(thisArg, cur, index, arr));
+        }, []);
+        return res;
+    };
+    var arr = [2, 3, 1, 5];
+    arr.myMap(function (item, index, arr) {
+        console.log(item, index, arr);
+    });
+    let res = arr.myMap((v) => v * 2);
+    // console.log(res); // [4,6,2,10]
+    var num1 = 0;
+    var num2 = 0;
+    var arr = [3,5,4,3,6,0,9];
+
+    var sum = arr.reduce(function (prev, cur) { // 1. 求数组项之和
+        num1++
+        return prev + cur;
+    },0);
+
+    var max = arr.reduce(function (prev, cur) { // 2. 求数组项最大值
+        num2++
+        return Math.max(prev,cur);
+    });
+    var newArr = arr.reduce(function (prev, cur) { // 3. 数组去重
+        prev.indexOf(cur) === -1 && prev.push(cur);
+        return prev;
+    },[]);
+
+    var arr = [[1, 2, 8], [3, 4, 9], [5, 6, 10]];
+    var res = arr.reduce((x, y) => x.concat(y), []); // 扁平一个二维数组
+</script>
+</html>
