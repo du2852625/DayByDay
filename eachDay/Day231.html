@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>说下你的vue项目目录结构，如果是大兴项目你该怎么划分结构和划分组件</h1>
+├── service                         # 后端接口管理
+│   ├── index.js                    # 接口管理出入口
+│   └── ...                         # 具体的不同业务/服务接口文件
+├── assets                          # 项目依赖资源管理
+│   └── imgs                        # 图片资源
+│   ├── style                       # 样式资源
+│   └── js                          # 依赖的第三方sdk之类的js资源
+├── components                      # 项目组件目录
+│   ├── public                      # 公共组件/基础组件（比如基础的按钮/输入框等）
+│   │   ├── index.js                # 基础组件的注册文件【可选】
+│   │   ├── README.md               # 组件使用说明文档【可选】
+│   │   └── ...                     # 组件
+│   └── ....                        # 基础性的业务组件
+├── pages
+│   ├── modules                     # 具体业务所归属的文件夹（可以用业务名称作为文件夹名字）
+│   │   ├── components              # 业务所用到的组件
+│   │   ├── views                   # 业务的所有页面
+│   │   ├── utils                   # 业务的工具集
+│   │   ├──    static                  # 业务所用到的静态资源
+│   │   ├── service                 # 业务的后端接口管理
+│   │   ├── store                   # 业务所用到的状态库（本结构基于Vue，这里是业务的Vuex）
+│   │   └── index.js                # 业务的唯一出口（包含路由与状态库）
+│   └── ....                        # 其他业务
+├── config                          # 项目的基础配置
+│   ├── index.js                    # 配置文件的出入口
+│   └── ...                         # 具体的配置文件
+├── router                          # 项目的路由管理
+│   ├── index.js                    # 路由出口
+│   └── ...                         # 与路由有关的其他文件
+├── store                           # 项目状态库的管理
+│   ├── index.js                    # 项目状态库的出入口
+│   └── ...                         # 具体的基础模块
+├── utils                           # 项目所用的工具集（封装的请求，表单的验证函数，时间格式化.....的工具）
+│   ├── index.js                    # 工具的入口
+│   └── ...                         # 具体的各个工具（请求封装、正则、验证......）
+├── main.js
+├── App.vue
+<h2>拓展常用文件命名</h2>
+<ul>
+    <li>src、source:源代码，用srv居多</li>
+    <li>test、__test__:测试文件，也常用__test__，facebook的测试框架jest默认的测试文件目录就是__test__</li>
+    <li>docs:文档</li>
+    <li>lib:库文件，library的缩写</li>
+    <li>dist:用来放打包编译后的文件，应该是distribution的缩写</li>
+    <li>build、scripts:构建脚本</li>
+    <li>utils、tools、helpers:工具代码</li>
+    <li>controllers、views、middlewares、models:MVC对应的models、views、controllers还有中间件middlerwares</li>
+    <li>router:路由</li>
+    <li>server:用来存放服务端代码</li>
+    <li>adapters:适配器，适配器是一种很常用的设计模式</li>
+    <li>legacy:一般用来存放兼容历史版本或兼容旧浏览器的代码</li>
+    <li>config:配置文件</li>
+    <li>benchmarks:benchmarks测试，又叫基准测试或性能测试。用来测试版本的性能变化</li>
+    <li>unit、spec:单元测试，一般放在test目录下</li>
+    <li>e2e:端对端测试，一般放在test目录下</li>
+    <li>assets、vendor:资源、一般用来放图片或css文件</li>
+    <li>static:静态资源</li>
+    <li>examples、demo:示例</li>
+    <li>component:组件</li>
+    <li>plugins:插件</li>
+    <li>common:公用的文件</li>
+    <li>packages:很多项目会打包出多个npm包，用来减少体积，一般会用packages来放不同的包。</li>
+    <li>misc:杂项，miscellaneous缩写</li>
+    <li>core：核心文件</li>
+</ul>
+
+</body>
+</html>
