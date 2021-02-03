@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Vuex的action和mutation的特性是什么？有什么区别？vuex怎么知道state是通过mutation修改还是外部直接修改的？</h1>
+<h2>一、Action和Mutation</h2>
+<h3>1.1Action</h3>
+<ul>
+    <li>一些对state的一步操作合一放在Action中，并通过在Action中commit Mutation变更状态</li>
+    <li>Action可以通过store.dispatch()方法触发，或者通过mapActions辅助函数讲vue组件的methods映射成store.dispatch()调用</li>
+</ul>
+<h3>1.2Mutation</h3>
+<ul>
+    <li>在vuex的严格模式下，Mutation是vuex中改变state的唯一途径</li>
+    <li>Mutation中只能是同步操作</li>
+    <li>通过store.commit()调用Mutation</li>
+</ul>
+<h3>1.3总结</h3>
+<p>mutations可以直接修改state，但只能包含同步操作，同时，只能通过提交commit调用。actions是用来触发mutations的，它无法直接改变state，
+它可以包含一步操作，它只能通过store.dispatch触发</p>
+<h2>二、vuex如何知道是如何修改的？</h2>
+<p>通过$watch 监听mutation的commit函数中_committing 是否为true</p>
+<p>Vuex中修改state的唯一渠道就是执行commit('xx',payload)方法，其底层通过执行this._withCommit(fn)设置_committing标志位，所以只要watch
+一下state，state change时判断是否_committing 值为true，即可判断修改的合法性。</p>
+</body>
+</html>
