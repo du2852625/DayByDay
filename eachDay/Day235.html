@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>动手实现以下数据Reduce方法的polyfill</h1>
+<h2>Array.reduce</h2>
+<h3>1.1简单介绍</h3>
+<ul>
+    <li>语法：arr.reduce(callback[,initalValue])</li>
+    <li>参数：
+        <ol>callback:针对每一项执行的函数
+            <span>acc:初始值/上一次回调返回的值</span>
+            <span>cur:当前值</span>
+            <span>idx:可选，当前索引</span>
+            <span>scr:可选，源数组</span>
+        </ol>
+        <ol>
+            initialValue：可选，累加的初始值
+        </ol>
+    </li>
+    <li>描述：方法接收一个函数作为累加器，reduce为数组中的每一个元素依次执行回调函数，不包括数组中杯删除或从未被赋值的元素。</li>
+</ul>
+<ul>
+    <li>如果没有初始值，pre将使用数组中的第一个元素。</li>
+    <li>在没有初始值的空数组上调用reduce将报错。</li>
+    <li>在没有初始值的仅有一个元素的数组上使用reduce，那么callback不会被执行，此唯一值将被返回。</li>
+</ul>
+<h3>1.2一个简单的问题</h3>
+<ul>
+    <li>下面的代码中，Array.reduce(callback)的callback函数被执行了几次？</li>
+</ul>
+<script>
+    [1, 2, 3, 4].reduce((pre, cur, index, array) => {
+        console.log("?", pre, cur, index);
+        return pre + cur;
+    });
+    // callback 被执行了3次
+</script>
+<h3>1.3实现polyfill</h3>
+<p>分下Array.reduce的几个关键点</p>
+<ul>
+    <li>Array.reduce是Array.prototype上的原生方法</li>
+    <li>Array.reduce接受两个参数：callback函数和init初始值[可选]</li>
+    <li>没有初始值&&空数组=>报错</li>
+    <li>没有初始值&&数组长度1=>直接返回数组里的这一项，不执行callback</li>
+    <li>没有初始值&&数组长度大于1=>正常的没有初始值的数组=> 从第二行开始执行，pre=arr[0],curr = arr[1]</li>
+    <li>有初始值&&数组长度大于1=>从第一项开始执行=> pre=init,curr = arr[0]</li>
+    <li>reduce返回值是pre</li>
+</ul>
+<script>
+    if (!Array.prototype.reduce) {
+        Object.defineProperty(Array.prototype, "reduce", {
+            value: function (callback) {
+                if (this === null) {
+                    throw new TypeError(
+                        "Array.prototype.reduce called on null or undefiend"
+                    );
+                }
+                if (typeof callback !== "function") {
+                    throw new TypeError(callback + "is not a function");
+                }
+                var o = Object(this);
+                var len = o.length >>> 0;
+                var k = 0;
+                var value;
+                if (arguments.length >= 2) {
+                    value = arguments[1];
+                } else {
+                    while (k < len && !(k in o)) {
+                        k++;
+                    }
+                    if (k >= len) {
+                        throw new TypeError("Reduce of empty array with no initial value");
+                    }
+                    value = o[k++];
+                }
+                while (k < len) {
+                    if (k in o) {
+                        value = callback(value, o[k], k, o);
+                    }
+                    k++;
+                }
+                return value;
+            },
+        });
+    }
+</script>
+<p>位运算符</p>
+<p>>>>是无符号右移运算符，它保证结果为非负整数，这正是length的值所想要的（如果运算子为NaN，length结果将为0，在后续代码中遍历对象也不会抛出异常）</p>
+</body>
+</html>

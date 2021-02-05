@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Vue-cli 默认是单页面的，如果要开发多页面应该怎么办？</h1>
+<h2>Vue-cli多页面配置</h2>、
+<p>单页应用（SPA）往往只含有包含一个主入口文件与index.html,页面切换通过局部刷新资源来完成。而在多页应用中，我们会为每个HTML文档文件都指定好一个
+    JS入口，这样一来当页面跳转时用户会活的一个新的HTML文档，整个页面会重新加载。</p>
+<p>vue-cli可以排至vue.config.js的pages选项，实现多页面应用开发</p>
+<p>官方文档：pages选项</p>
+<ul>
+    <li>Type：Object</li>
+    <li>Default：undefined</li>
+</ul>
+<p>在multi-page模式下构建应用。每个“page”应该有一个对应的JavaScript入口文件。其值应该是一个对象，对象的key是入口的名字，value是：</p>
+<ul>
+    <li>一个指定了entry，template，filename,title和chunks的对象（除了entry之外都是可选的）</li>
+    <li>或一个指定其entry的字符串</li>
+</ul>
+<script>
+    module.exports = {
+        pages: {
+            index: {
+                // page 的入口
+                entry: "src/index/main.js",
+                // 模板来源
+                template: "public/index.html",
+                // 在 dist/index.html 的输出
+                filename: "index.html",
+                // 当使用 title 选项时，
+                // template 中的 title 标签需要是 <title><%= htmlWebpackPlugin.options.title %></title>
+                title: "Index Page",
+                // 在这个页面中包含的块，默认情况下会包含
+                // 提取出来的通用 chunk 和 vendor chunk。
+                chunks: ["chunk-vendors", "chunk-common", "index"],
+            },
+            // 当使用只有入口的字符串格式时，
+            // 模板会被推导为 `public/subpage.html`
+            // 并且如果找不到的话，就回退到 `public/index.html`。
+            // 输出文件名会被推导为 `subpage.html`。
+            subpage: "src/subpage/main.js",
+        },
+    };
+</script>
+<h3>1.1初始化项目</h3>
+<p>通过vue-cli脚手架初始化一个默认工程，修改项目目录</p>
+<p>
+    ├── assets
+    │   └── logo.png
+    ├── components
+    │   ├── About.vue
+    │   ├── HelloWorld.vue
+    │   └── Home.vue
+    ├── pages
+    │   ├── page1
+    │   │   ├── page1.html
+    │   │   ├── page1.js
+    │   │   └── page1.vue
+    │   └── page2
+    │       ├── page2.html
+    │       ├── page2.js
+    │       └── page2.vue
+    └── style
+    ├── common.css
+    └── common.less
+</p>
+<h3>1.2vue.config.js配置</h3>
+<script>
+    let path = require("path");
+    let glob = require("glob");
+    //配置pages多页面获取当前文件夹下的html和js
+    function getEntry(globPath) {
+        let entries = {},
+            basename,
+            tmp,
+            pathname,
+            appname;
+
+        glob.sync(globPath).forEach(function (entry) {
+            basename = path.basename(entry, path.extname(entry));
+            // console.log(entry)
+            tmp = entry.split("/").splice(-3);
+            console.log(tmp);
+            pathname = basename; // 正确输出js和html的路径
+
+            // console.log(pathname)
+            entries[pathname] = {
+                entry: "src/" + tmp[0] + "/" + tmp[1] + "/" + tmp[1] + ".js",
+                template: "src/" + tmp[0] + "/" + tmp[1] + "/" + tmp[2],
+                title: tmp[2],
+                filename: tmp[2],
+            };
+        });
+        return entries;
+    }
+
+    let pages = getEntry("./src/pages/**?/*.html");
+    console.log(pages);
+    //配置end
+
+    module.exports = {
+        pages,
+    };
+</script>
+<h3>1.3dist打包目录</h3>
+<p>
+    ├── css
+    │   ├── page1.9951d5a1.css
+    │   └── page2.009d0d6f.css
+    ├── img
+    │   └── logo.82b9c7a5.png
+    ├── js
+    │   ├── chunk-vendors.f061f10e.js
+    │   ├── page1.5a5322e0.js
+    │   └── page2.db57562b.js
+    ├── page1.html
+    └── page2.html
+</p>
+<h3>1.4源码部分</h3>
+<p>@vue/cli-service通过判断是否传入pages参数来生成对应Webpack配置文件。</p>
+<p>如果配置了pages选项，则会执行以下步骤：</p>
+<ul>
+    <li>清除原有entry</li>
+    <li>对pages字段的每个key做循环，解析每个入口对象的参数entry（必填）、title、template、filename、chunks</li>
+    <li>通过entry字段生成webpack的entry入口</li>
+</ul>
+<script>
+    const multiPageConfig = options.pages
+    if (!multiPageConfig) {
+        // default, single page setup.
+        htmlOptions.template = fs.existsSync(htmlPath)
+            ? htmlPath
+            : defaultHtmlPath
+
+        webpackConfig
+            .plugin('html')
+            .use(HTMLPlugin, [htmlOptions])
+
+        if (!isLegacyBundle) {
+            // inject preload/prefetch to HTML
+        ...
+        }
+    }else{
+        // multi-page setup
+        webpackConfig.entryPoints.clear()
+
+        const pages = Object.keys(multiPageConfig)
+        const normalizePageConfig = c => typeof c === 'string' ? { entry: c } : c
+
+        pages.forEach(name => {
+            const pageConfig = normalizePageConfig(multiPageConfig[name])
+            const {
+                entry,
+                template = `public/${name}.html`,
+                filename = `${name}.html`,
+                chunks = ['chunk-vendors', 'chunk-common', name]
+            } = pageConfig
+            const customHtmlOptions = {}
+            for (const key in pageConfig) {
+                if (
+                    !['entry', 'template', 'filename', 'chunks'].includes(key)
+                ) {
+                    customHtmlOptions[key] = pageConfig[key]
+                }
+            }
+
+            // inject entry
+            const entries = Array.isArray(entry) ? entry : [entry]
+            webpackConfig.entry(name).merge(entries.map(e => api.resolve(e)))
+
+            // resolve page index template
+            const hasDedicatedTemplate = fs.existsSync(api.resolve(template))
+            const templatePath = hasDedicatedTemplate
+                ? template
+                : fs.existsSync(htmlPath)
+                    ? htmlPath
+                    : defaultHtmlPath
+
+            publicCopyIgnore.push(api.resolve(templatePath).replace(/\\/g, '/'))
+
+            // inject html plugin for the page
+            const pageHtmlOptions = Object.assign(
+                {},
+                htmlOptions,
+                {
+                    chunks,
+                    template: templatePath,
+                    filename: ensureRelative(outputDir, filename)
+                },
+                customHtmlOptions
+            )
+
+            webpackConfig
+                .plugin(`html-${name}`)
+                .use(HTMLPlugin, [pageHtmlOptions])
+        })
+    }
+</script>
+</body>
+</html>
