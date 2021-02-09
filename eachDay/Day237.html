@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>说一下什么是运营商劫持？有什么预防措施？</h1>
+    <h2>一、什么是运营商</h2>
+    <p>运营商是指那些提供宽带服务的ISP，包括三大运营商中国电信、中国移动、中国联通，还有一些小运营商，比如长成宽带、歌华有线宽带
+        运营商提供最最基础的网络服务，掌握着通往用户物理大门的钥匙，目前运营商劫持很普遍。
+    </p>
+    <h2>二、劫持方式</h2>
+    <p>运营商比较常见的作恶方式有三种，分别是DNS劫持、HTTP劫持、HTTPS劫持
+    </p>
+    <p>DNS劫持：这种劫持会把你重新定位到其他网站，我们所熟悉的钓鱼网站就是这个原理。但是因为它的违法性，现在被严厉的监管起来，已经很少见</p>
+    <p>HTTP劫持：虽然DNS劫持已经被监管起来了，但是还是有HTTP劫持，DNS解析的域名的IP地址不变，当运营商发现你的是HTTP请求时，就会在里面插入
+        一些奇奇怪怪的广告（比如一些banner、浮标、更有甚至把你的商品位劫持了）并且这种现象十分常见，不信你可以试着随便打开一个网页，仔细
+        看就会发现一些小尾巴，这就是被HTTP劫持了。
+    </p>
+    <p>HTTPS劫持：安全的超文本传输协议，数据加密也能劫持？答案是肯定的，劫持方式有两种</p>
+    <ul>
+        <li>1、伪造证书，通过病毒或者其他方式将伪造证书的根证书安装在用户系统中（较少）</li>
+        <li>2、代理也有客户的证书与私钥，或者客户端与代理认证的时候不校验合法性，即可通过代理来与我们服务端进行数据交互（较多）</li>
+    </ul>
+    <h2>三、防运营商劫持</h2>
+    <p>准确的来说是防script，iframe注入型劫持，95%以上是这种劫持方式，因为DNS劫持被严管了</p>
+    <h3>3.1防劫持代码参考</h3>
+    <p>加入运营商劫持代码后，不在白名单和安全标签（shendun-eddy）内的script或者iframe都会被remove掉。</p>
+    <p>提示：network内能看到加载了其他非白名单内的script代码，但他们都没有执行</p>
+    <h3>3.2核心功能</h3>
+    <p>MutationObserver() 创建并返回一个新的MutationObserver 它会在指定的DOM发生变化时被调用。</p>
+    <h3>3.3兼容性</h3>
+    <img src="Day237.png" alt="">
+    <p>所有浏览器的兼容性是92.79%，手机端的兼容性更高，代码中加了保护所以放心使用</p>
+    <h2>四、总结</h2>
+    <p>目前运营商劫持率大约是3%~25%，它们无处不在。为了还用户一个干净安全的浏览器环境，我们需要做好预防措施</p>
+    <ul>
+        <li>1.全站https，能防一部分</li>
+        <li>2.加入防运营商劫持代码，能防大部分注入劫持</li>
+        <li>3.记录Log，记录证据，向工信部投诉。</li>
+    </ul>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>防劫持代码测试</title>
+    <script>
+      console.log(
+        "发生劫持，初始化就直接置顶的流氓行为，暂无法防御，但可以通过埋点记录LOG，向工信部投诉！!"
+      );
+    </script>
+    <!-- 防劫持 -->
+    <script shendun-eddy>
+      /**
+       * @note 防劫持代码
+       * @key MutationObserver 提供了监视对DOM树所做更改的能力
+       */
+      (function () {
+        var srcFilterTags = ["script", "iframe"];
+        // 域名白名单 可以加多个
+        var whiteList = ["zeptojs.com"];
+        var whiteListReg = [];
+
+        // 正则匹配
+        whiteList.forEach(function (wl) {
+          var wlReg = new RegExp(
+            "/.+?\/\/" + wl + "|\/\/" + wl + "|.+?\." + wl + "|^" + wl
+          );
+          whiteListReg.push(wlReg);
+        });
+        // 白名单助手
+        var inWhileList = function (addedNode) {
+          // shendun-eddy 是script的白名单标签
+          if (
+            addedNode.src === "" &&
+            addedNode.getAttribute("shendun-eddy") !== null
+          ) {
+            return true;
+          }
+
+          var isInWhiteList = false;
+
+          whiteListReg.forEach(function (wlReg) {
+            if (wlReg.test(addedNode.src)) {
+              isInWhiteList = true;
+              return false;
+            }
+          });
+
+          return isInWhiteList;
+        };
+
+        // dom观察器
+        var mutationHandler = function (records) {
+          records.forEach(function (record) {
+            Array.prototype.slice
+              .call(record.addedNodes)
+              .forEach(function (addedNode) {
+                srcFilterTags.forEach(function (tagName) {
+                  // 标签匹配 白名单匹配
+                  if (
+                    addedNode.tagName === tagName.toUpperCase() &&
+                    !inWhileList(addedNode)
+                  ) {
+                    addedNode.remove();
+                  }
+                });
+              });
+          });
+        };
+
+        // 核心 - MutationObserver 提供了监视对DOM树所做更改的能力
+        // 优点 - 动态监听是否有非法的 iframe 和 script 代码
+        // 缺点 - 无法查找头部直接插入的代码
+        var MutationObserver =
+            window.MutationObserver ||
+            window.WebKitMutationObserver ||
+            window.MozMutationObserver,
+          observeMutationSupport = !!MutationObserver;
+        var html = document.getElementsByTagName("html")[0];
+
+        if (observeMutationSupport) {
+          new MutationObserver(mutationHandler).observe(html, {
+            childList: true,
+            subtree: true,
+          });
+        }
+
+        // 唯独直接加载的不能remove掉，异步加载的都能remove掉！！
+        // ***  记录头部的script，通知工信部 ***
+        var eleList = document.querySelectorAll("script");
+        var len = eleList.length;
+        for (var i = 0; i < len; i++) {
+          // 遍历操作
+          if (!inWhileList(eleList[i])) {
+            // do sth 这里的删除虽然已经晚了，因为头部同步JS已被执行，删除操作意义不大，但可以统计被劫持的代码是什么，记录好LOG 通知工信部
+            // sendLog
+            eleList[i].remove();
+          }
+        }
+      })();
+    </script>
+    <script>
+      console.log("劫持1");
+    </script>
+  </head>
+  <body>
+    <div>防劫持代码测试</div>
+    <div class="father">
+      <div class="bro">
+        <div class="xiongdei">
+          <script src="https://mt.cnzz.com/js/hdpi_canvas.js"></script>
+        </div>
+      </div>
+    </div>
+    <script src="http://zeptojs.com/zepto.min.js"></script>
+    <!-- 
+        http://yun.dui88.com/qiho-h5/jqg/shendun_test.js
+        里边的代码是
+        <script>
+            (function () {
+                console.log("哎哟，我来劫持你了...");
+            })();
+        </script>
+        虽然访问了这个script, 但被remove了不会执行
+    -->
+    <script src="http://yun.dui88.com/qiho-h5/jqg/shendun_test.js"></script>
+    <script>
+      console.log("劫持....");
+    </script>
+  </body>
+</html>
