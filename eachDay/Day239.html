@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>按要求实现GO函数</h1>
+<script>
+    // function go(...arg1) {
+    //     let str = "go";
+    //     var addarg = function (...arg2) {
+    //         if (!arg2[0]) {
+    //             //当没有参数时候就累加默认的参数o 并返回当前函数保持对str的引用产生闭包
+    //             str += "o";
+    //             return addarg;
+    //         } else {
+    //             //如果是有参数就直接返回最后累加的字符串
+    //             return (str += arg2[0]);
+    //         }
+    //     };
+    //     return addarg(...arg1);
+    // }
+    function go(arg) {
+        let str = "go";
+        debugger
+        let addarg = function(arg1) {
+            if(arg1) {
+                str += arg1;
+                return str
+            } else {
+                str += "o"
+                return addarg
+            }
+        }
+        return addarg(arg)
+    }
+    // console.log(go("l")); //gol
+    console.log(go()()()()("l")); //goooool
+</script>
+<script>
+    // 示例
+    // go("l"); //gol
+    // go()("l"); //gool
+    // go()()()("l"); //返回gooool
+</script>
+
+</body>
+</html>

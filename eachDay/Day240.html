@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    let a = 1,
+        b = 2,
+        head = { next: { next: 1 } };
+    [a, b] = [b, a];
+    [head.next, head.next.next] = [head.next.next, head.next];
+    console.log(a, b, head);
+</script>
+<script>
+    // 数组解构
+    [a, b] = [1, 2];
+    console.log(a, b); // 1 2
+    [b, a] = [1, 2];
+    console.log(a, b); // 2 1
+    let a = 1,
+        b = 2;
+    /* 数组解构 */
+    [a, b] = [b, a];
+
+    /* 传统做法 */
+    let tmp = a;
+    a = b;
+    b = tmp;
+
+    [a, ...rest] = [1, 2, 3];
+    console.log(a); // 1
+    console.log(rest); // [2,3]
+
+    // 对象解构
+    ({ a, b } = { b: 1, a: 2 });
+    console.log(a, b); // 2,1
+    ({ a: a, b: b } = { b: 1, a: 2 });
+    // 举个例子
+    ({ a: e, b: f } = { b: 1, a: 2 });
+    console.log(e, b); // 2, 1
+    // 允许同名
+    ({ a: e, a: f } = { b: 1, a: 2 });
+    console.log(e, f); // 2 2
+    // ES6允许对象字面量的属性名用表达式定义
+    let obj = { custName: "yd" },
+        attr = "Name";
+    ({ ["cust" + attr]: value } = obj);
+    console.log(value); // yd
+    // 默认值
+    [a, b = 2] = [1];
+    console.log(b); // 2
+    [a, b = 2] = [1, undefined];
+    console.log(b); // 2
+    [a, b = 2] = [1, null];
+    console.log(b); // null
+</script>
+</body>
+</html>
