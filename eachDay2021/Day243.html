@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>WebWorker 的缺点是什么？在worker线程怎么获取主线程上下文？解决卡顿的问题除了使用webWorker还有其他解决方案吗？</h1>
+<img src="img/Day243-1.png" alt="">
+<script>
+    // 主线程
+    var uInt8Array = new Uint8Array(new ArrayBuffer(10));
+    for (var i = 0; i < uInt8Array.length; ++i) {
+        uInt8Array[i] = i * 2; // [0, 2, 4, 6, 8,...]
+    }
+    worker.postMessage(uInt8Array);
+
+    // Worker 线程
+    self.onmessage = function (e) {
+        var uInt8Array = e.data;
+        postMessage(
+            "Inside worker.js: uInt8Array.toString() = " + uInt8Array.toString()
+        );
+        postMessage(
+            "Inside worker.js: uInt8Array.byteLength = " + uInt8Array.byteLength
+        );
+    };
+</script>
+<img src="img/Day243-2.png" alt="">
+<script>
+    // Transferable Objects 格式
+    worker.postMessage(arrayBuffer, [arrayBuffer]);
+
+    // 例子
+    var ab = new ArrayBuffer(1);
+    worker.postMessage(ab, [ab]);
+</script>
+<img src="img/Day243-3.png" alt="">
+<img src="img/Day243-4.png" alt="">
+<script>
+    function timeSlicing(gen) {
+        if (typeof gen === "function") gen = gen();
+        if (!gen || typeof gen.next !== "function") return;
+
+        (function next() {
+            const res = gen.next(); // ①
+            if (res.done) return; // ⑤
+            setTimeout(next); // ③
+        })();
+    }
+
+    // 调用时间分片函数
+    timeSlicing(function* () {
+        const start = performance.now();
+        while (performance.now() - start < 1000) {
+            console.log("执行逻辑");
+            yield; // ②
+        }
+        console.log("done"); // ④
+    });
+</script>
+<img src="img/Day243-5.png" alt="">
+</body>
+</html>
